@@ -22,7 +22,7 @@ const RequestInterceptor = ({ children }) => {
    
     const bearer = "Bearer "+ response.accessToken;
     config.headers.Authorization = bearer;
-    config.headers['Ocp-Apim-Subscription-Key'] = 'b1b1812bea8249409758cdc72acf4b29';
+    config.headers['Ocp-Apim-Subscription-Key'] = '{Ocp-Apim-Subscription-Key}';
     config.headers["Content-Type"] = 'application/json';
     config.headers['Access-Control-Allow-Origin'] = '*'
     console.log(config);
