@@ -13,8 +13,8 @@ import { LogLevel } from "@azure/msal-browser";
 
 export const msalConfig= {
     auth: {
-        clientId: "1bc5b7de-8a59-4649-a1a5-bf3ab1ec52f0",
-        authority: "https://login.microsoftonline.com/3843c9d0-cc6e-40ea-a2df-3da9436d92e5",
+        clientId: "{clientId}",
+        authority: "https://login.microsoftonline.com/{tenantId}",
         redirectUri: "https://collabor8test.azurewebsites.net/"
        //redirectUri: "http://localhost:3000"
     },
@@ -56,7 +56,7 @@ export const msalConfig= {
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest = {
-    scopes: ["api://6f950f3c-99bd-42af-b3d0-1f2570405ce1/app.user"]
+    scopes: ["api://{clientId}/app.user"]
 };
 
 
