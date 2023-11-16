@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import NavbarComponent from './Navbar';
-import { ErrorSummary  } from '@cegal/ds-components';
+import { SelectMultiple, ErrorSummary  } from '@cegal/ds-components';
 import { Link } from 'react-router-dom';
 import {useLocation} from 'react-router-dom';
 import { Application } from './Models.js';
+import axios from 'axios';
 
 function AppRegistrationPage() {
   // Use state hooks to store the values of the form fields
@@ -11,7 +12,8 @@ function AppRegistrationPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [validMessage, setValidMessage] = useState('');
   const location = useLocation();
-  //application.orgNumb = location.orgNumb;
+  const [isSubmitting, setSubmitting] = useState(false);
+  //application.orgId = location.orgId;
   //application.applicationOwner = location.superUserEmail;
   console.log('Received: ' + JSON.stringify(location))
 
@@ -27,26 +29,30 @@ function AppRegistrationPage() {
   // Handle the submit event of the form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const clonedApp = Object.assign({}, application)
 
+    clonedApp.applicationOwners = clonedApp.applicationOwners.map((it) => it.value)
     try {
-      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/application/AddApplication', {
-        method: 'POST',
-        body: JSON.stringify(clonedApp),
-      });
+      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/application/addApplication', 
+        clonedApp,
+      );
 
-      if (response.ok) {
+      if (response.status==201) {
         // Handle success
+        setSubmitting(false);
         setValidMessage("App '" + clonedApp.applicationName + "' created!");
         setErrorMessage("");
       } else {
         // Handle errors
+        setSubmitting(false);
         console.error('Error:', response);
         const errorText = await 'Server response: Error: ' + response.status + ' ' + response.statusText;
         setErrorMessage(errorText);        
         setValidMessage("");
       }
     } catch (error) {
+        setSubmitting(false);
         console.error('Error:', error);
         //alert('An error occurred while sending data to Azure Function: ' + error.message);
         setErrorMessage(error.message);
@@ -75,48 +81,34 @@ function AppRegistrationPage() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="orgNumb">
-            Org Number:
-          </label>
-          <input
-            className="form-input"
-            type="number"
-            id="orgNumb"
-            value={application.orgNumb}
-            defaultValue={location.orgNumb}
-            onChange={(e) => handleInputChange('orgNumb', e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="applicationID">
+          <label className="form-label" htmlFor="applicationId">
             Application ID:
           </label>
           <input
             className="form-input"
             type="text"
-            id="applicationID"
-            value={application.applicationID}
-            onChange={(e) => handleInputChange('applicationID', e.target.value)}
+            id="applicationId"
+            value={application.applicationId}
+            onChange={(e) => handleInputChange('applicationId', e.target.value)}
           />
         </div>
-        
         <div className="form-group">
-          <label className="form-label" htmlFor="applicationOwner">
-            Super User Email:
+          <label className="form-label" htmlFor="users">
+            Owners:
           </label>
-          <input
-            className="form-input"
-            type="email"
-            id="applicationOwner"
-            value={application.applicationOwner}
-            defaultValue={location.superUserEmail}
-            onChange={(e) => handleInputChange('applicationOwner', e.target.value)}
-            required
-          />
-        </div>        
-        <button className="form-button" type="submit">
-          Submit
+         <SelectMultiple className="select-multiple"
+            creatable
+            value={application.applicationOwners}
+            onChange={(values) => setApp({
+              ...application, applicationOwners:values
+            })}
+          options={[
+          ]}
+        />  
+        </div>     
+        <button disabled={isSubmitting} className="form-button">
+                        {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
+                        Submit
         </button>
         {validMessage && <div className="valid-message">{validMessage}</div>}
         <div className="paddedBox">

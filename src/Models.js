@@ -1,7 +1,7 @@
 export class Company {
-  constructor(companyName, orgNumb, primaryDomain, connectedDomains, superUserEmail, users) {
+  constructor(companyName, orgId, primaryDomain, connectedDomains, superUserEmail, users) {
     this.companyName = companyName;
-    this.orgNumb = orgNumb;
+    this.orgId = orgId;
     this.primaryDomain = primaryDomain;
     this.connectedDomains = connectedDomains;
     this.superUserEmail = superUserEmail;
@@ -10,11 +10,10 @@ export class Company {
 }
 
 export class Application {
-  constructor(applicationName, applicationID, orgNumb, applicationOwner, users) {
+  constructor(applicationName, applicationId, applicationOwners, users) {
     this.applicationName = applicationName;
-    this.applicationID = applicationID;
-    this.orgNumb = orgNumb;
-    this.applicationOwner = applicationOwner;
+    this.applicationId = applicationId;
+    this.applicationOwners = applicationOwners;
     this.users = users;
   }
 }

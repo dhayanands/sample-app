@@ -17,13 +17,16 @@ const RequestInterceptor = ({ children }) => {
       loginRequest,
       account
     })
+
+    
    
-    const bearer = `Bearer ${response.accessToken}`
+    const bearer = "Bearer "+ response.accessToken;
     config.headers.Authorization = bearer;
-    config.headers['Ocp-Apim-Subscription-Key'] = '{APIM-SUBSCRIPTION-KEY}';
+    config.headers['Ocp-Apim-Subscription-Key'] = 'b1b1812bea8249409758cdc72acf4b29';
     config.headers["Content-Type"] = 'application/json';
     config.headers['Access-Control-Allow-Origin'] = '*'
     console.log(config);
+    console.log(response);
     return config
   })
   /* eslint-enable no-param-reassign */

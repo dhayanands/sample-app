@@ -10,6 +10,7 @@ function AddUsersToCompanyPage() {
   const [company, setCompany] = useState(new Company('', '', '', '', ''));
   const [errorMessage, setErrorMessage] = useState('');
   const [validMessage, setValidMessage] = useState('');
+  const [isSubmitting, setSubmitting] = useState(false);
 
   // Handle the change event of each input field
   const handleInputChange = (field, value) => {
@@ -24,28 +25,31 @@ function AddUsersToCompanyPage() {
   // Handle the submit event of the form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const clonedCompany = Object.assign({}, company)
 
     clonedCompany.users = clonedCompany.users.map((it) => it.value)
     try {
      
-      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/company/AddUsers', {
-        method: 'POST',
-        body: JSON.stringify(clonedCompany),
-      });
+      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/company/addUsers', 
+        clonedCompany,
+      );
 
-      if (response.ok) {
+      if (response.status==200) {
         // Handle success
-        setValidMessage("Company '" + clonedCompany.companyName + "' created!");
+        setSubmitting(false);
+        setValidMessage("Users '" + clonedCompany.users + "' have been added to Company" + clonedCompany.companyName);
         setErrorMessage("");
       } else {
         // Handle errors
+        setSubmitting(false);
         console.error('Error:', response);
         const errorText = await 'Server response: ' + response.status + ' ' + response.statusText;
         setErrorMessage(errorText);        
         setValidMessage("");
       }
     } catch (error) {
+        setSubmitting(false);
         console.error('Error:', error);
         setErrorMessage(error.message);
         setValidMessage("");
@@ -74,15 +78,15 @@ function AddUsersToCompanyPage() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="org-number">
-            Org Number:
+          <label className="form-label" htmlFor="org-id">
+            Org ID:
           </label>
           <input
             className="form-input"
             type="number"
-            id="org-numb"
-            value={company.orgNumb}
-            onChange={(e) => handleInputChange('orgNumb', e.target.value)}
+            id="org-id"
+            value={company.orgId}
+            onChange={(e) => handleInputChange('orgId', e.target.value)}
             required
           />
         </div>
@@ -100,8 +104,9 @@ function AddUsersToCompanyPage() {
           ]}
         />
         </div>        
-        <button className="form-button" type="submit">
-          Submit
+        <button disabled={isSubmitting} className="form-button">
+                        {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
+                        Submit
         </button>
         {validMessage && <div className="valid-message">{validMessage}</div>}
         <div className="paddedBox">

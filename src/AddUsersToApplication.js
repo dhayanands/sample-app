@@ -10,7 +10,7 @@ function AddUsersToApplicationPage () {
   const [application, setApplication] = useState(new Application('', '', '', ''));
   const [errorMessage, setErrorMessage] = useState('');
   const [validMessage, setValidMessage] = useState('');
-
+  const [isSubmitting, setSubmitting] = useState(false);
   // Handle the change event of each input field
   const handleInputChange = (field, value) => {
       setApplication((prevApp) => ({
@@ -24,28 +24,31 @@ function AddUsersToApplicationPage () {
   // Handle the submit event of the form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const clonedApp = Object.assign({}, application)
 
     clonedApp.users = clonedApp.users.map((it) => it.value)
     try {
      
-      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/application/AddUsers', {
-        method: 'POST',
-        body: JSON.stringify(clonedApp),
-      });
+      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/application/addUsers',
+        clonedApp
+      );
 
-      if (response.ok) {
+      if (response.status==200) {
         // Handle success
-        setValidMessage("Application '" + clonedApp.applicationName + "' created!");
+        setSubmitting(false);
+        setValidMessage("Users '" + clonedApp.users + "' have been added to Application " + clonedApp.applicationName);
         setErrorMessage("");
       } else {
         // Handle errors
+        setSubmitting(false);
         console.error('Error:', response);
         const errorText = await 'Server response: ' + response.status + ' ' + response.statusText;
         setErrorMessage(errorText);        
         setValidMessage("");
       }
     } catch (error) {
+        setSubmitting(false);
         console.error('Error:', error);
         setErrorMessage(error.message);
         setValidMessage("");
@@ -74,15 +77,15 @@ function AddUsersToApplicationPage () {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="org-number">
+          <label className="form-label" htmlFor="org-id">
             Application ID:
           </label>
           <input
             className="form-input"
             type="number"
             id="application-id"
-            value={application.applicationID}
-            onChange={(e) => handleInputChange('applicationID', e.target.value)}
+            value={application.applicationId}
+            onChange={(e) => handleInputChange('applicationId', e.target.value)}
             required
           />
         </div>
@@ -100,8 +103,9 @@ function AddUsersToApplicationPage () {
           ]}
         />
         </div>        
-        <button className="form-button" type="submit">
-          Submit
+        <button disabled={isSubmitting} className="form-button">
+                        {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
+                        Submit
         </button>
         {validMessage && <div className="valid-message">{validMessage}</div>}
         <div className="paddedBox">

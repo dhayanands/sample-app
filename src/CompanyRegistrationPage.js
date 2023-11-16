@@ -11,6 +11,7 @@ function CompanyRegistrationPage() {
   const [company, setCompany] = useState(new Company('', '', '', '', ''));
   const [errorMessage, setErrorMessage] = useState('');
   const [validMessage, setValidMessage] = useState('');
+  const [isSubmitting, setSubmitting] = useState(false);
 
   // Handle the change event of each input field
   const handleInputChange = (field, value) => {
@@ -24,30 +25,39 @@ function CompanyRegistrationPage() {
 
   // Handle the submit event of the form
   const handleSubmit = async (e) => {
+    setSubmitting(true);
     e.preventDefault();
+   
     const clonedCompany = Object.assign({}, company)
 
     clonedCompany.connectedDomains = clonedCompany.connectedDomains.map((it) => it.value)
-    clonedCompany.superUserEmail = clonedCompany.superUserEmail.map((it) => it.value)
+   // clonedCompany.superUserEmail = clonedCompany.superUserEmail.map((it) => it.value)
     try {
      
-      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/company/AddCompany', {
-        method: 'POST',
-        body: JSON.stringify(clonedCompany),
-      });
+      const response = await axios.post('https://on-poc-shared-apim.azure-api.net/api/c8a/beta/company/addCompany', 
+        clonedCompany,
+      );
+      
+      console.log(response);
 
-      if (response.ok) {
+      if (response.status==201) {
         // Handle success
+        setSubmitting(false);
         setValidMessage("Company '" + clonedCompany.companyName + "' created!");
         setErrorMessage("");
       } else {
         // Handle errors
+        setIsLoading(false);
+
+        console.log(response.status);
         console.error('Error:', response);
         const errorText = await 'Server response: ' + response.status + ' ' + response.statusText;
         setErrorMessage(errorText);        
         setValidMessage("");
       }
     } catch (error) {
+        setSubmitting(false);
+        console.log(response.status);
         console.error('Error:', error);
         setErrorMessage(error.message);
         setValidMessage("");
@@ -76,15 +86,15 @@ function CompanyRegistrationPage() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="org-number">
-            Org Number:
+          <label className="form-label" htmlFor="org-id">
+            Org ID:
           </label>
           <input
             className="form-input"
             type="number"
-            id="org-numb"
-            value={company.orgNumb}
-            onChange={(e) => handleInputChange('orgNumb', e.target.value)}
+            id="org-id"
+            value={company.orgId}
+            onChange={(e) => handleInputChange('orgId', e.target.value)}
             required
           />
         </div>
@@ -114,8 +124,21 @@ function CompanyRegistrationPage() {
           ]}
         />
         </div>
-        
+
         <div className="form-group">
+          <label className="form-label" htmlFor="super-user-email">
+          Super User Email:
+          </label>
+          <input
+            className="form-input"
+            type="text"
+            id="super-user-email"
+            value={company.superUserEmail}
+            onChange={(e) => handleInputChange('superUserEmail', e.target.value)}
+          />
+        </div>
+        
+        {/* <div className="form-group">
           <label className="form-label" htmlFor="super-user-email">
             Super User Email:
           </label>
@@ -128,9 +151,11 @@ function CompanyRegistrationPage() {
           options={[
           ]}
         />
-        </div>        
-        <button className="form-button" type="submit">
-          Submit
+        </div>         */}
+        
+        <button disabled={isSubmitting} className="form-button">
+                        {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
+                        Submit
         </button>
         {validMessage && <div className="valid-message">{validMessage}</div>}
         <div className="paddedBox">
